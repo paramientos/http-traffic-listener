@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/google/gopacket"
@@ -18,13 +20,13 @@ import (
 
 // TrafficStats holds statistics about captured traffic
 type TrafficStats struct {
-	HTTPPackets    int
-	HTTPSPackets   int
-	TotalBytes     int
-	UniqueIPs      map[string]bool
-	UniqueDomains  map[string]bool
-	UniqueURLs     map[string]bool // Added for URL tracking
-	mutex          sync.Mutex
+	HTTPPackets   int
+	HTTPSPackets  int
+	TotalBytes    int
+	UniqueIPs     map[string]bool
+	UniqueDomains map[string]bool
+	UniqueURLs    map[string]bool // Added for URL tracking
+	mutex         sync.Mutex
 }
 
 // HTTPTrafficLogger represents the traffic monitoring state
@@ -67,9 +69,9 @@ func NewHTTPTrafficLogger(logFilePath, deviceName string) (*HTTPTrafficLogger, e
 		logger:     log.New(ljLogger, "", 0),
 		lumberjack: ljLogger,
 		stats: TrafficStats{
-			UniqueIPs:      make(map[string]bool),
-			UniqueDomains:  make(map[string]bool),
-			UniqueURLs:     make(map[string]bool),
+			UniqueIPs:     make(map[string]bool),
+			UniqueDomains: make(map[string]bool),
+			UniqueURLs:    make(map[string]bool),
 		},
 	}, nil
 }
@@ -224,7 +226,7 @@ func (l *HTTPTrafficLogger) StartCapturing() error {
 
 						// Extract domain from URL
 						domain := parser.ExtractDomainFromURL(url)
-						
+
 						// Save domain and URL information
 						if domain != "" {
 							l.stats.UniqueDomains[domain] = true

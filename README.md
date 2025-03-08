@@ -45,6 +45,10 @@ cd http_traffic_listener
 
 ```bash
 ./http_traffic_listener [options]
+
+or
+
+go run cmd/http_traffic_listener/main.go
 ```
 
 ### Command Line Options
